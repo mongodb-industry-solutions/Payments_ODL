@@ -1,0 +1,13 @@
+backend/.DS_Store
+backend/.env
+backend/mongocryptd.pid
+backend/logs
+backend/mongo_*
+backend/node_modules
+backend/docs
+backend/customer-master-key.txt
+backend/api/auth/*
+
+frontend/.env*
+frontend/node_modules
+frontend/.next

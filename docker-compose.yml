@@ -1,0 +1,20 @@
+services:
+  aml-fraud-detection-front:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: payment-odl-front:latest
+    ports:
+      - "3000:3000"
+    restart: always
+    container_name: payment-odl-front
+
+  aml-fraud-detection-back:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: payment-odl-back:latest
+    ports:
+      - "3030:3030"
+    restart: always
+    container_name: payment-odl-back
