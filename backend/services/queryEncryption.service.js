@@ -1,17 +1,15 @@
-
 //import { writeFileSync, readFileSync, existsSync } from "fs";
-require('dotenv').config();
+require("dotenv").config();
 
-const { writeFileSync, readFileSync, existsSync } = require('fs');
+const { writeFileSync, readFileSync, existsSync } = require("fs");
 //import { randomBytes } from "crypto";
-const { randomBytes } = require('crypto');
+const { randomBytes } = require("crypto");
 // import { ClientEncryption } from "mongodb";
 const { ClientEncryption } = require("mongodb");
-const logger = require('./logger.service');
+const logger = require("./logger.service");
+const path = require("path");
 
-
-
- function getKMSProviderCredentials(kmsProviderName) {
+function getKMSProviderCredentials(kmsProviderName) {
   let kmsProviders;
   switch (kmsProviderName) {
     case "aws":
@@ -61,7 +59,7 @@ const logger = require('./logger.service');
           try {
             writeFileSync("customer-master-key.txt", randomBytes(96));
           } catch (err) {
-            lo
+            lo;
             throw new Error(
               `Unable to write Customer Master Key to file due to the following error: ${err}`
             );
@@ -80,7 +78,9 @@ const logger = require('./logger.service');
         };
         // end-get-local-key
       } catch (err) {
-        logger.error(`queryEncrptoion.service.js-getKMSProviderCredentials: Unable to read the Customer Master Key due to the following error: ${err}`);
+        logger.error(
+          `queryEncrptoion.service.js-getKMSProviderCredentials: Unable to read the Customer Master Key due to the following error: ${err}`
+        );
         throw new Error(
           `Unable to read the Customer Master Key due to the following error: ${err}`
         );
@@ -89,14 +89,16 @@ const logger = require('./logger.service');
 
     default:
       //logger
-      logger.error(`queryEncrptoion.service.js-getKMSProviderCredentials: Unable to read the Customer Master Key due to the following error: ${err}`);
+      logger.error(
+        `queryEncrptoion.service.js-getKMSProviderCredentials: Unable to read the Customer Master Key due to the following error: ${err}`
+      );
       throw new Error(
         `Unrecognized value for KMS provider name \"${kmsProviderName}\" encountered while retrieving KMS credentials.`
       );
   }
 }
 
- function getCustomerMasterKeyCredentials(kmsProviderName) {
+function getCustomerMasterKeyCredentials(kmsProviderName) {
   let customerMasterKeyCredentials;
   switch (kmsProviderName) {
     case "aws":
@@ -133,16 +135,18 @@ const logger = require('./logger.service');
       return customerMasterKeyCredentials;
     default:
       // logger
-      logger.error(`queryEncrptoion.service.js-getCustomerMasterKeyCredentials: Unable to read the Customer Master Key due to the following error: ${err}`);
+      logger.error(
+        `queryEncrptoion.service.js-getCustomerMasterKeyCredentials: Unable to read the Customer Master Key due to the following error: ${err}`
+      );
       throw new Error(
         `Unrecognized value for KMS provider name \"${kmsProviderName}\" encountered while retrieving Customer Master Key credentials.`
       );
   }
 }
 
+console.log;
 
-
- async function getAutoEncryptionOptions(
+async function getAutoEncryptionOptions(
   kmsProviderName,
   keyVaultNamespace,
   kmsProviders
@@ -152,15 +156,17 @@ const logger = require('./logger.service');
 
     // start-kmip-encryption-options
     const extraOptions = {
-      cryptSharedLibPath: process.env.SHARED_LIB_PATH, // Path to your Automatic Encryption Shared Library
+      cryptSharedLibPath: process.cwd() + process.env.SHARED_LIB_PATH, // Path to your Automatic Encryption Shared Library
     };
+
+    console.log("THIS IS THE CRYPT PATH", extraOptions.cryptSharedLibPath);
 
     const autoEncryptionOptions = {
       keyVaultNamespace,
       kmsProviders,
       extraOptions,
-    //   mongocryptdSpawnArgs: ["--port", "30000"],
-    //   mongocryptdURI: 'mongodb://localhost:30000',
+      //   mongocryptdSpawnArgs: ["--port", "30000"],
+      //   mongocryptdURI: 'mongodb://localhost:30000',
       tlsOptions,
     };
     // end-kmip-encryption-options
@@ -168,10 +174,11 @@ const logger = require('./logger.service');
   } else {
     // start-auto-encryption-options
     const extraOptions = {
-      cryptSharedLibPath: process.env.SHARED_LIB_PATH, 
-      cryptSharedLibRequired: true // Path to your Automatic Encryption Shared Library
+      cryptSharedLibPath: process.cwd() + process.env.SHARED_LIB_PATH,
+      cryptSharedLibRequired: true, // Path to your Automatic Encryption Shared Library
     };
 
+    console.log("THIS IS THE CRYPT PATH", extraOptions.cryptSharedLibPath);
     const autoEncryptionOptions = {
       keyVaultNamespace,
       kmsProviders,
@@ -195,36 +202,40 @@ function getKmipTlsOptions() {
   return tlsOptions;
 }
 
- function getClientEncryption(encryptedClient, autoEncryptionOptions) {
+function getClientEncryption(encryptedClient, autoEncryptionOptions) {
   // start-client-encryption
-  const clientEncryption = new ClientEncryption(encryptedClient, autoEncryptionOptions);
+  const clientEncryption = new ClientEncryption(
+    encryptedClient,
+    autoEncryptionOptions
+  );
   // end-client-encryption
   return clientEncryption;
 }
 
- async function createEncryptedCollection(
+async function createEncryptedCollection(
   clientEncryption,
   encryptedDatabase,
   encryptedCollectionName,
   kmsProviderName,
   encryptedFieldsMap
-  
 ) {
   try {
-    let customerMasterKeyCredentials = getCustomerMasterKeyCredentials(kmsProviderName);
+    let customerMasterKeyCredentials =
+      getCustomerMasterKeyCredentials(kmsProviderName);
     // start-create-encrypted-collection
 
     // check if collection exists
     const collections = await encryptedDatabase.listCollections().toArray();
     const coll = collections.find((c) => c.name === encryptedCollectionName);
     if (coll) {
-      logger.info(`Collection ${encryptedCollectionName} already exists. Skipping create collection.`);
-        return;
-     // await encryptedDatabase.dropCollection(encryptedCollectionName);
+      logger.info(
+        `Collection ${encryptedCollectionName} already exists. Skipping create collection.`
+      );
+      return;
+      // await encryptedDatabase.dropCollection(encryptedCollectionName);
     }
 
     await clientEncryption.createEncryptedCollection(
-
       encryptedDatabase,
       encryptedCollectionName,
       {
@@ -237,15 +248,17 @@ function getKmipTlsOptions() {
     logger.info(`Collection ${encryptedCollectionName} created.`);
     // end-create-encrypted-collection
   } catch (err) {
-    logger.error(`queryEncrptoion.service.js-createEncryptedCollection: Unable to create encrypted collection due to the following error: ${err}`);
+    logger.error(
+      `queryEncrptoion.service.js-createEncryptedCollection: Unable to create encrypted collection due to the following error: ${err}`
+    );
     throw new Error(
       `Unable to create encrypted collection due to the following error: ${err}`
     );
   }
 }
 module.exports = {
-    getKMSProviderCredentials,
-    getAutoEncryptionOptions,
-    getClientEncryption,
-    createEncryptedCollection,
-}
+  getKMSProviderCredentials,
+  getAutoEncryptionOptions,
+  getClientEncryption,
+  createEncryptedCollection,
+};

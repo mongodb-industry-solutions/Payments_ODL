@@ -7,6 +7,7 @@ backend/node_modules
 backend/docs
 backend/customer-master-key.txt
 backend/api/auth/*
+backend/lib/
 
 frontend/.env*
 frontend/node_modules
