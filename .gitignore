@@ -12,3 +12,5 @@ backend/lib/
 frontend/.env*
 frontend/node_modules
 frontend/.next
+
+logs/
