@@ -1,0 +1,49 @@
+/* DynamicDisplay.module.css */
+
+.jsonDisplay {
+    background-color: var(--bg-color, #f8f9fa);
+    padding: 0px 10px; /* 15px top and bottom, 20px left and right */
+    border-radius: 5px;
+    width: 100%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    align-items: left;
+    transition: background-color 0.1s ease;
+  }
+  
+  .jsonDisplay:hover {
+    background-color: #E3FCF7;
+  }
+  
+  .singleFields {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+  }
+  
+  .field {
+    margin-right: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .embeddedDocument {
+    margin-right: 10px;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 0.5fr 0.5fr 0.5fr 0.75fr 0.5fr 0.5fr 0.5fr 0.5fr 0.2fr 0.2fr;
+    width: 100%;
+    padding: 10px 0px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .grid:hover {
+    background-color: #E3FCF7;
+  }

@@ -1,0 +1,6 @@
+/* TransactionTable.module.css */
+
+.transactionTable {
+    display: flex;
+    flex-direction: column;
+  }
