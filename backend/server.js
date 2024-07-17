@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+require('dotenv').config(); 
+// Logger service for logging messages
+const logger = require("./services/logger.service");
 const cookieParser = require("cookie-parser");
 
 const app = express();
@@ -11,7 +14,6 @@ app.use(cookieParser()); // Middleware for parsing cookies
 app.use(express.json()); // Middleware for parsing JSON bodies
 
 const URL = process.env.URL
-console.log(URL)
 
 const corsOptions = {
   origin: URL, 
@@ -41,9 +43,6 @@ app.use("/api/account", accountRoutes); // Account related routes
 app.use("/api/transaction", transactionRoutes); // Transaction related routes
 app.use("/api/payment", paymentRoutes); // Payment related routes
 app.use("/api/notification", notificationRoutes); // Notification related routes
-
-// Logger service for logging messages
-const logger = require("./services/logger.service");
 
 const socketService = require("./services/socket.service");
 // Initial socket connection

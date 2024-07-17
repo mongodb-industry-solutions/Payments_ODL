@@ -44,10 +44,10 @@ async function addTransaction(req, res) {
 async function addExternalTransaction(req, res) {
     try {
         const transaction = req.body;
-        const accountId = req.params.accountId;
-        const userId = req.params.userId;
+        const oriAccountId = req.params.oriAccountId;
+        const recAccountId = req.params.recAccountId;
 
-        const savedTransaction = await transactionService.addExternalTransaction(userId, accountId, transaction);
+        const savedTransaction = await transactionService.addExternalTransaction(oriAccountId, recAccountId, transaction);
         res.send(savedTransaction);
     } catch (err) {
         logger.error(`transaction.controller.js-addExternalTransaction: Failed to add external transaction`, err);

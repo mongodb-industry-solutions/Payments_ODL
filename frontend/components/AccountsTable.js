@@ -44,7 +44,7 @@ const AccountsTable = () => {
       const login = JSON.parse(localStorage.getItem('login'));
       const response = await fetch(`${apiUrl}/api/account?userId=${login._id}`, { method: 'GET' });
       const data = await response.json();
-      console.log('data', data);
+      //console.log('data', data);
       const flattenedData = data.map(d => flattenObject(d));
       setData(flattenedData);
       setLoading(false);

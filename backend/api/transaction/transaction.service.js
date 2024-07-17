@@ -290,17 +290,17 @@ async function add(userId, transaction) {
 }
 **/
 
-async function addExternalTransaction(userId, accountId, transaction) {
+async function addExternalTransaction(oriAccountId, recAccountId, transaction) {
     try {
 
         // Retrieve the encrypted 'transactions' collection
         const { collection/*, session */} = await dbService.getEncryptedCollection('transactions', serviceName, encryptedFieldsMap);
 
-        console.log("********* Start External Transaction *********")
+        console.log("********* Start External Transaction Receiver *********")
         // Fetch target user details
-        console.log("accountId" + accountId)
-        const user = await accountService.getById(accountId);
-        if (!user) throw new Error(`user ${accountId} not found`);
+        console.log("recAccountId" + recAccountId)
+        let recAccount = await accountService.getById(recAccountId);
+        if (!recAccount) throw new Error(`user ${recAccountId} not found`);
 
         // Set initial transaction details
         transaction.date = Date.now();
@@ -308,16 +308,28 @@ async function addExternalTransaction(userId, accountId, transaction) {
         transaction.type = 'external';
         transaction.steps = getDistrebutionSteps(transaction.type);
 
-        console.log("********* Validate External Transaction *********")
-       
-        // Validate the transaction initiation
         const receiver = {
-            userId: userId,
-            name: user.user.username,
-            accountNumber: user.accountNumber,
-            accountId: new ObjectId(accountId)
+            userId: recAccount.userId,
+            name: recAccount.user.username,
+            accountNumber: recAccount.accountNumber,
+            accountId: recAccountId
         }
         console.log("receiver" + JSON.stringify(receiver))
+
+        console.log("********* Start External Transaction Originator *********")
+        // Fetch target user details
+        console.log("oriAccountId" + oriAccountId)
+        let OriAccount  = await accountService.getById(oriAccountId);
+        if (!OriAccount) throw new Error(`user ${oriAccountId} not found`);
+
+        const sender = {
+            userId: OriAccount.userId,
+            name: OriAccount.user.username,
+            accountNumber: OriAccount.accountNumber,
+            accountId: new ObjectId(oriAccountId)
+        }
+        console.log("sender" + JSON.stringify(sender))
+        
         // const externalSender = {
         //     payerId: transaction.payerInfo.payerId,
         //     email: transaction.payerInfo.email,
@@ -325,7 +337,8 @@ async function addExternalTransaction(userId, accountId, transaction) {
         // }
 
         transaction.referenceData = { 
-            receiver
+            receiver,
+            sender
         }
 
         console.log("********* Insert External Transaction *********" + JSON.stringify(transaction))
@@ -336,7 +349,7 @@ async function addExternalTransaction(userId, accountId, transaction) {
         // Update the user's transaction history
         const users = await dbService.getEncryptedCollection('users', serviceName);
 
-        await userService.addTransaction(userId, transaction, users.collection/*, session*/);
+        await userService.addTransaction(user._id, transaction, users.collection/*, session*/);
 
         return transaction;
     } catch (err) {
@@ -439,17 +452,21 @@ async function updateExternal(transactionId, steps, amount) {
             transactionToSave.status = 'completed';
             let transaction = await collection.findOne({ _id: new ObjectId(transactionId) });
             //update reciever user
-            const receiverAccount = await accountService.getAccountAndUpdateBalance(transaction.referenceData.receiver.userId, transaction.accountId, amount)
+            const senderAccount = await accountService.getAccountAndUpdateBalance(transaction.referenceData.sender.userId.toString(), transaction.referenceData.sender.accountId.toString(), -1 * amount)
+            const receiverAccount = await accountService.getAccountAndUpdateBalance(transaction.referenceData.receiver.userId, transaction.referenceData.receiver.accountId, amount)
 
             // Update users with  transaction details
             await collection.updateOne({ _id: new ObjectId(transactionId) }, { $set: transactionToSave });
             transaction = {...transaction, ...transactionToSave};
             const receiverNotification = {
                 username: transaction.referenceData.receiver.name,
-                data: `You have received $${transaction.amount} to account ${receiverAccount.accountType}, origin: ${transaction.type} from ${transaction.payerInfo.email} with status ${transactionToSave.status}`,
+                data: `You have received $${transaction.amount} to account ${receiverAccount.accountType}, origin: ${senderAccount} from ${transaction.payerInfo.email} with status ${transactionToSave.status}`,
             }
             // Update users object with transaction details
-            await Promise.all([userService.addTransaction(transaction.referenceData.receiver.userId, transaction)]);
+            await Promise.all([
+                userService.addTransaction(transaction.referenceData.sender.userId, transaction),
+                userService.addTransaction(transaction.referenceData.receiver.userId, transaction)
+            ]);
             // Send notification to receiver
             await notificationService.sendNotification([receiverNotification]);
 

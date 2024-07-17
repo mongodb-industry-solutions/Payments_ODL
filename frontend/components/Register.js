@@ -4,6 +4,8 @@ import TextInput from '@leafygreen-ui/text-input';
 import { H2 } from '@leafygreen-ui/typography';
 import { MongoDBLogoMark } from '@leafygreen-ui/logo';
 import Button  from '@leafygreen-ui/button';
+import Banner from '@leafygreen-ui/banner';
+
 
 const LoginPage = () => {
   const [clientId, setClientId] = useState('');
@@ -83,6 +85,11 @@ const LoginPage = () => {
       flexDirection: 'column',
       alignItems: 'center',
     },
+    buttonContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '10px',
+    },
     input: { textAlign: 'left', width: '200px', },
     button: { margin: '10px' },
   };
@@ -126,8 +133,13 @@ const LoginPage = () => {
               value={password}
               style={{position: 'relative', top: '0px', left: '14px',  width: '180px',}}
             />
-            <Button size={'default'} onClick={handleSubmit} style={{marginTop: '10px',}} > Submit </Button>
-            <Button size={'default'} onClick={handleBack} style={{marginTop: '10px',}} > Back </Button>
+            <div style={styles.buttonContainer}>
+              <Button size={'default'} onClick={handleSubmit} style={{marginTop: '10px',}} > Submit </Button>
+              <Button size={'default'} onClick={handleBack} style={{marginTop: '10px',}} > Back </Button>
+            </div>
+            <Banner variant="warning" style={{marginTop: '15px',}} >
+              Please enter your name and click on register. <br />No other field is required
+            </Banner>
           </form>
       </div>
     </div>

@@ -31,10 +31,10 @@ async function listenToTransactions() {
 
                 // Perform initial processing steps for the transaction
                 const steps = transaction.steps.map((step) => {
-                    console.log(`As part of payment for transaction ${transaction.txId}, performing step ${step.api}`);
+                    console.log(`As part of payment for transaction ${transaction._id}, performing step ${step.api}`);
                     // mock sleep
               
-                    return { completed: true, api: step.api, response: { status: 'success' } };
+                    return { completed: true, api: step.api, response: { status: 'success' } }; 
                 });
 
                 // Update the transaction after performing steps

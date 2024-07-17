@@ -117,7 +117,7 @@ const HomePage = () => {
               </IconButton>
             </div>
           </div>
-          <Tabs setSelected={setSelected} selected={selected} baseFontSize={16}>
+          <Tabs setSelected={setSelected} selected={selected} aria-label="Navigation Tabs">
             <Tab name="My Accounts" disabled={false}>
               <AccountsTable />
             </Tab>

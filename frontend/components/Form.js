@@ -10,6 +10,7 @@ import { useToast } from '@leafygreen-ui/toast';
 const Form = ({  setPopupOpen, popupTitle }) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const [amount, setAmount] = useState(null);
+    const [paymentMethod, setPaymentMethod] = useState(null);
     const [Originator, setOriginator] = useState(null);
     const [Beneficiary, setBeneficiary] = useState(null);
     const { pushToast } = useToast();
@@ -65,7 +66,7 @@ const Form = ({  setPopupOpen, popupTitle }) => {
               "accountId": Benef.accountId,
               "amount": amount,
               "type": "external",
-              "paymentMethod": Ori.accountNumber,
+              "paymentMethod": paymentMethod,
               "status": "Completed",
               "payerInfo": {
                   "payerId": "AX12345BXC123456",
@@ -84,9 +85,12 @@ const Form = ({  setPopupOpen, popupTitle }) => {
                   "merchantId": Benef.userId
               }
           }
+          console.log(bud);
+          console.log('Ori',Ori);
+          console.log('Benef',Benef);
           
             // Perform PUT request
-            const response = await fetch(`${apiUrl}/api/transaction/external/${login._id}/${Benef.accountId}`, {
+            const response = await fetch(`${apiUrl}/api/transaction/external/${Ori.accountId}/${Benef.accountId}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(bud)
@@ -132,33 +136,13 @@ const Form = ({  setPopupOpen, popupTitle }) => {
 
     const generateOriginators = async () => {
         let accounts = [];
-        if (popupTitle === 'New Transaction') {
-            accounts = await fetchAccounts();
-        } else {
-            accounts = [{
-                username: '',
-                account: 'Digital Payment',
-                accountNumber: 'Paypal'
-              },{
-                username: '',
-                account: 'Digital Payment',
-                accountNumber: 'Zelle'
-              },{
-                username: '',
-                account: 'Digital Payment',
-                accountNumber: 'Venmo'
-              }];
-        }
+        accounts = await fetchAccounts();
         await setValue1(accounts);
       };
 
       const generateBeneficiary = async () => {
         let accounts = [];
-        if (popupTitle === 'New Transaction') {
-            accounts = await fetchUserAccounts();
-        } else {
-            accounts = await fetchAccounts();
-        }
+        accounts = await fetchUserAccounts();
         await setValue2(accounts);
       };
 
@@ -171,6 +155,14 @@ const Form = ({  setPopupOpen, popupTitle }) => {
     <form onSubmit={handleSubmit}>
         <Subtitle>{popupTitle}</Subtitle>
         <NumberInput style={{marginTop:'3px'}} value={amount} placeholder={'Transaction Amount'} onChange={event => setAmount(Number(event.target.value))} />
+        {popupTitle !== 'New Transaction' && (
+          <SearchInput style={{marginTop:'3px'}} placeholder={'Payment method'} value={paymentMethod}
+          onChange={event => setPaymentMethod(event.target.value)}>
+          <SearchResult key={1} description={`Digital Payment`}>Paypal</SearchResult>
+          <SearchResult key={2} description={`Digital Payment`}>Zelle</SearchResult>
+          <SearchResult key={3} description={`Digital Payment`}>Venmo</SearchResult>
+      </SearchInput>
+        )}
         <SearchInput style={{marginTop:'3px'}} placeholder={'Originator Account Number'} value={Originator}
             onChange={event => setOriginator(event.target.value)}>
             {value1.map((account, index) => (

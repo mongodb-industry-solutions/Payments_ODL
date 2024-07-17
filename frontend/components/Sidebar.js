@@ -42,8 +42,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   return (
     <div className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
       <div className={styles['sidebar-content']}>
-        <H3 baseFontSize ={16} >My Profile</H3>
-        <Image className={styles.profileImage} src={'/images/userAvatar.png'} alt="Profile" width={500} height={500}/>
+        <H3 >My Profile</H3>
+        <Image className={styles.profileImage} src={'/images/userAvatar.png'} alt="Profile" width={500} height={500} priority/>
         {loading ? (
           <p>Loading...</p>
         ) : (

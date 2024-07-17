@@ -74,7 +74,7 @@ create users and associate with the relevant custom role.
 
 Clone the repo:
 ```
-git clone https://github.com/mongodb-industry-solutions/Payments_ODL.git
+git clone https://github.com/mongodb-industry-solutions/Payments_ODL
 ```
 
 Download your OS shared crypt library for FLE : 

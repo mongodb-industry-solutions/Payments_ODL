@@ -25,9 +25,7 @@ function Header() {
       </div>
       <div className={styles["logout-container"]}>
         <Link href="/login">
-          <a onClick={handleLogout}>
-            <Body style={{ cursor: 'pointer' }}>Log Out</Body>
-          </a>
+          <Body style={{ cursor: 'pointer' }} onClick={handleLogout}>Log Out</Body>
         </Link>
       </div>
     </div>
