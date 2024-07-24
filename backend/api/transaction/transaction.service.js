@@ -314,11 +314,9 @@ async function addExternalTransaction(oriAccountId, recAccountId, transaction) {
             accountNumber: recAccount.accountNumber,
             accountId: recAccountId
         }
-        console.log("receiver" + JSON.stringify(receiver))
 
         console.log("********* Start External Transaction Originator *********")
         // Fetch target user details
-        console.log("oriAccountId" + oriAccountId)
         let OriAccount  = await accountService.getById(oriAccountId);
         if (!OriAccount) throw new Error(`user ${oriAccountId} not found`);
 
@@ -328,13 +326,6 @@ async function addExternalTransaction(oriAccountId, recAccountId, transaction) {
             accountNumber: OriAccount.accountNumber,
             accountId: new ObjectId(oriAccountId)
         }
-        console.log("sender" + JSON.stringify(sender))
-        
-        // const externalSender = {
-        //     payerId: transaction.payerInfo.payerId,
-        //     email: transaction.payerInfo.email,
-        //     accountInfo: transaction.payerInfo
-        // }
 
         transaction.referenceData = { 
             receiver,
@@ -382,52 +373,54 @@ function cleanTransaction(transaction) {
  */
 async function update(transactionId, steps) {
     try {
-        // Retrieve the encrypted 'transactions' collection
         const { collection } = await dbService.getEncryptedCollection('transactions', serviceName);
 
-        // Prepare the object to be saved
         let transactionToSave = { steps };
 
-        // Check if all steps are completed
         const isCompleted = steps.every(step => step.completed);
         if (isCompleted) {
-            // Update the status to 'completed' if all steps are completed
             transactionToSave.status = 'completed';
-            //update reciever user
 
             let transaction = await collection.findOne({ _id: new ObjectId(transactionId) });
             const receiver = transaction.referenceData.receiver;
             const sender = transaction.referenceData.sender;
-            transaction.type = 'incoming';
-            transaction.status = 'completed';
-            
-            transaction = cleanTransaction(transaction);
 
-            // Update users with  transaction details
+            // Create separate transaction objects for sender and receiver
+            let senderTransaction = {
+                ...transaction,
+                type: 'outgoing',
+                status: 'completed'
+            };
 
-            
-            await Promise.all([userService.addTransaction(receiver.userId, transaction),userService.addTransaction(sender.userId, transaction)]);
+            let receiverTransaction = {
+                ...transaction,
+                type: 'incoming',
+                status: 'completed'
+            };
+
+            senderTransaction = cleanTransaction(senderTransaction);
+            receiverTransaction = cleanTransaction(receiverTransaction);
+
+            // Update users with correct transaction details
+            await Promise.all([
+                userService.addTransaction(sender.userId, senderTransaction),
+                userService.addTransaction(receiver.userId, receiverTransaction)
+            ]);
+
             const senderNotification = {
                 username: sender.name,
                 data: `You have sent $${transaction.amount} to ${receiver.name} with status ${transaction.status}`,
-            }
+            };
             const receiverNotification = {
                 username: receiver.name,
-                data: `You have received $${transaction.amount} as ${transaction.type} from ${sender.name} with status ${transaction.status}`,
-            }
+                data: `You have received $${transaction.amount} from ${sender.name} with status ${transaction.status}`,
+            };
             await notificationService.sendNotification([senderNotification, receiverNotification]);
-            
-            
-
         }
 
-        // Update the transaction in the collection
-        console.log(`Using updateOne to update transaction ${transactionId}` );
         await collection.updateOne({ _id: new ObjectId(transactionId) }, { $set: transactionToSave });
 
-        // Note: The session is not used here for the transaction, remove if unnecessary
     } catch (err) {
-        // Log and throw the error for further handling
         logger.error(`transaction.service.js-update: cannot update transaction ${transactionId}`, err);
         throw err;
     }

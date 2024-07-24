@@ -254,30 +254,31 @@ async function addTransaction(userId, transaction, collection = undefined, sessi
             session = db.session;
         }
 
-        console.log(`adding transaction ${transaction._id} for user ${userId}`)
-        //Check if only status update is needed
-        console.log(`Using updateOne to update recent transaction ${transaction._id} for user ${userId}` );
-       const updateOutcome = await collection.updateOne({ 
-        _id: new ObjectId(userId),
-        "recentTransactions._id": transaction._id
-    },
-    { 
-        $set: { "recentTransactions.$.status": transaction.status }
-    },
-    { session });
+        console.log(`adding transaction ${transaction._id} for user ${userId}`);
 
+        // Remove any existing transaction with the same _id
+        const result = await collection.updateOne(
+            { _id: new ObjectId(userId) },
+            { $pull: { recentTransactions: { _id: new ObjectId(transaction._id) } } },
+            { session }
+        );
 
-        // If no matching transaction was found, add the new transaction to the beginning of the array
-        if (updateOutcome.modifiedCount === 0) {
-            console.log(`Using updateOne to add recent transaction ${transaction._id} for user ${userId}` );
-            await collection.updateOne(
-                { _id: new ObjectId(userId) },
-                { $push: { recentTransactions: { $each: [transaction],
-                                                        $sort: { date : -1 },
-                                                        $slice: 20 } } }, // Keeps only the latest 20 transactions
-                { session }
-            );
-        }
+        console.log(`addTransaction - removed ${result.modifiedCount} existing transactions`);
+
+        // Add the new transaction to the beginning of the array
+        await collection.updateOne(
+            { _id: new ObjectId(userId) },
+            { 
+                $push: { 
+                    recentTransactions: { 
+                        $each: [transaction],
+                        $sort: { date: -1 },
+                        $slice: 20 
+                    } 
+                } 
+            },
+            { session }
+        );
 
         if (session && session.inTransaction()) {
             await session.commitTransaction();
