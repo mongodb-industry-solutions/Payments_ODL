@@ -37,7 +37,7 @@ const DynamicDisplay = ({ data, backgroundColor = '#f8f9fa' }) => {
     <div style={{ backgroundColor, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center' }}>
       <div className={styles.grid}>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{data.amount}</div>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{data.type}</div>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{data.paymentMethod || data.type}</div>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{data.status}</div>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{new Date(data.date).toLocaleString()}</div>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{data.referenceData?.receiver?.name}</div>

@@ -54,7 +54,8 @@ const Form = ({  setPopupOpen, popupTitle }) => {
     };
 
     const handleSubmit = async () => {
-        if (Beneficiary == Originator) {
+      setPopupOpen(false);  
+      if (Beneficiary == Originator) {
           alert("Beneficiary can't be the same as the Originator");
           return;
         } else {
@@ -130,7 +131,6 @@ const Form = ({  setPopupOpen, popupTitle }) => {
               pushToast({ title:"The Transaction failed.", variant: "warning" });
             }
           }
-          setPopupOpen(false);
         }
       };
 
