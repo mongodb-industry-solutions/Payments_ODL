@@ -28,7 +28,6 @@ const LoginPage = () => {
       return;
     }
     let lowerCaseClientId = clientId.toLowerCase();
-    console.log("lowerCaseClientId",lowerCaseClientId);
     const response = await fetch(`${apiUrl}/api/user/username/${lowerCaseClientId}`, {method: 'GET'});
     const exi = await response.json();
     console.log("exi",exi);

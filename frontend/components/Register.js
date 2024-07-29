@@ -10,7 +10,7 @@ import Banner from '@leafygreen-ui/banner';
 const LoginPage = () => {
   const [clientId, setClientId] = useState('');
   const [password, setPassword] = useState(''); 
-  const [email, setEmail] = useState(''); 
+  const [email, setEmail] = useState('');  
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -34,21 +34,24 @@ const LoginPage = () => {
   };
 
   const handleSubmit = async () => {
-    const response = await fetch(`${apiUrl}/api/user/register`, 
-    {method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({username: clientId, email: email, password: password}),
-    });
-    const exi = await response.json();
-    console.log("exi",exi);
-  
-    if (clientId.trim() === '' || password.trim() === '') {
+    let lowerCaseClientId = clientId.toLowerCase();
+    if (lowerCaseClientId.trim() === '' || password.trim() === '') {
       alert('Please enter both Client ID and Password');
       return;
-    }else if(exi.err) {
-      alert('Client ID does not exist');
-      return;
-    } else {
+    }else {
+      const resp = await fetch(`${apiUrl}/api/user/username/${lowerCaseClientId}`, {method: 'GET'});
+      const exi0 = await resp.json();
+      if(exi0._id) {
+        alert('Client ID already exist');
+        return;
+      }
+      const response = await fetch(`${apiUrl}/api/user/register`, 
+        {method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({username: lowerCaseClientId, email: email, password: password}),
+        });
+      const exi = await response.json();
+      //console.log("exi",exi);
       const log = {};
       log._id = exi._id;
       log.username = clientId;
